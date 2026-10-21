@@ -10,7 +10,7 @@
     </div>
     <h1>{{ heading }}</h1>
     <p class="lede">
-        Today everyone uses this laptop over the Wi-Fi. Render is the next step:
+        Today everyone uses this laptop over the Wi-Fi. Render gives the same site
         a public link that works from anywhere. This is a class demo, not a production setup.
     </p>
     <ul class="key-points">
@@ -29,34 +29,47 @@
                 <li><strong>Supabase</strong> stores the rows (title, image path)</li>
                 <li><strong>Cloudinary</strong> stores the image files</li>
             </ul>
+            <p>Render only replaces your laptop. Supabase and Cloudinary stay exactly the same.</p>
         </div>
     </li>
 
     <li class="step">
         <div class="step-card">
-            <h2>Add Gunicorn</h2>
-            <p>Your laptop uses <code>runserver</code>. Render needs a real web server called Gunicorn.</p>
+            <h2>Get the project ready</h2>
+            <p>Your laptop uses <code>runserver</code>. Render needs two more packages:</p>
+            <ul>
+                <li><strong>Gunicorn</strong> runs Django on the server</li>
+                <li><strong>WhiteNoise</strong> serves your CSS and JS (Gunicorn does not do that by itself)</li>
+            </ul>
             <div class="code-block">
                 <div class="code-head">
-                    <span class="code-label">Terminal</span>
+                    <span class="code-label">requirements.txt</span>
                     <button type="button" class="copy-btn" data-copy>Copy</button>
                 </div>
-                <pre><code>pip install gunicorn "psycopg[binary]"
-pip freeze > requirements.txt</code></pre>
+                <pre><code>Django==5.1.4
+cloudinary
+django-cloudinary-storage
+Pillow
+python-dotenv
+psycopg[binary]
+gunicorn
+whitenoise</code></pre>
             </div>
-        </div>
-    </li>
-
-    <li class="step">
-        <div class="step-card">
-            <h2>Allow the Render address</h2>
+            <p>Add WhiteNoise right after the security middleware, and tell Django where to collect static files:</p>
             <div class="code-block">
                 <div class="code-head">
                     <span class="code-label">config/settings.py</span>
                     <button type="button" class="copy-btn" data-copy>Copy</button>
                 </div>
-                <pre><code>ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')</code></pre>
+                <pre><code>MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # ... the rest stay the same ...
+]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'</code></pre>
             </div>
+            <p class="callout callout-tip"><strong>ALLOWED_HOSTS:</strong> this demo uses <code>ALLOWED_HOSTS = ['*']</code>, so the Render address works without extra setup.</p>
         </div>
     </li>
 
@@ -68,73 +81,174 @@ pip freeze > requirements.txt</code></pre>
                     <span class="code-label">Terminal</span>
                     <button type="button" class="copy-btn" data-copy>Copy</button>
                 </div>
-                <pre><code>git init
-git add .
-git commit -m "class django demo"
-git branch -M main
-git remote add origin https://github.com/your-name/your-repo.git
-git push -u origin main</code></pre>
+                <pre><code>git add .
+git commit -m "ready for render"
+git push origin main</code></pre>
             </div>
-            <p class="callout callout-warn"><strong>Check first:</strong> <code>.env</code> must be in <code>.gitignore</code> so your keys stay private.</p>
+            <p class="callout callout-warn"><strong>Check first:</strong> <code>.env</code> must be in <code>.gitignore</code>. Your keys go into Render in step 6, not into GitHub.</p>
         </div>
     </li>
 
     <li class="step">
         <div class="step-card">
-            <h2>Create a Web Service</h2>
-            <p>On <a href="https://render.com" target="_blank" rel="noreferrer">render.com</a>: <strong>New</strong> → <strong>Web Service</strong> → pick your repo.</p>
+            <h2>Start a new Web Service</h2>
+            <ol>
+                <li>Sign in at <a href="https://render.com" target="_blank" rel="noreferrer">render.com</a> with your GitHub account</li>
+                <li>Click <strong>+ New</strong> → <strong>Web Service</strong></li>
+                <li>Choose <strong>Git Provider</strong> and pick your repository</li>
+            </ol>
+            <p>Render now shows a form. Step 5 explains every field.</p>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Fill in the form, field by field</h2>
+            <dl class="field-list">
+                <div class="field">
+                    <dt>Name</dt>
+                    <dd class="field-value"><code>mams-django-workshop</code></dd>
+                    <dd class="field-why">Becomes your link: <code>mams-django-workshop.onrender.com</code>. Lowercase letters and dashes only.</dd>
+                </div>
+                <div class="field">
+                    <dt>Project <span class="optional">optional</span></dt>
+                    <dd class="field-value">Leave as it is</dd>
+                    <dd class="field-why">Only groups services in the dashboard. Not needed for one app.</dd>
+                </div>
+                <div class="field">
+                    <dt>Language</dt>
+                    <dd class="field-value"><code>Python 3</code></dd>
+                    <dd class="field-why">Django is a Python framework.</dd>
+                </div>
+                <div class="field">
+                    <dt>Branch</dt>
+                    <dd class="field-value"><code>main</code></dd>
+                    <dd class="field-why">Render deploys this branch, and redeploys every time you push to it.</dd>
+                </div>
+                <div class="field">
+                    <dt>Region</dt>
+                    <dd class="field-value"><code>Singapore (Southeast Asia)</code></dd>
+                    <dd class="field-why">Closest to India and to the Supabase database, so pages load faster. Oregon works too, just slower.</dd>
+                </div>
+                <div class="field">
+                    <dt>Root Directory <span class="optional">optional</span></dt>
+                    <dd class="field-value">Leave empty</dd>
+                    <dd class="field-why"><code>manage.py</code> is already at the top of the repo. Only fill this if your project is inside a subfolder.</dd>
+                </div>
+                <div class="field">
+                    <dt>Build Command</dt>
+                    <dd class="field-value">Copy the block below</dd>
+                    <dd class="field-why">Runs once per deploy: installs packages, gathers CSS, creates tables.</dd>
+                </div>
+            </dl>
             <div class="code-block">
                 <div class="code-head">
-                    <span class="code-label">Build command</span>
+                    <span class="code-label">Build Command</span>
                     <button type="button" class="copy-btn" data-copy>Copy</button>
                 </div>
-                <pre><code>pip install -r requirements.txt</code></pre>
+                <pre><code>pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate</code></pre>
             </div>
+            <dl class="field-list">
+                <div class="field">
+                    <dt>Start Command</dt>
+                    <dd class="field-value">Copy the block below</dd>
+                    <dd class="field-why">Starts the site. <code>config</code> is the folder that holds <code>settings.py</code> and <code>wsgi.py</code>.</dd>
+                </div>
+            </dl>
             <div class="code-block">
                 <div class="code-head">
-                    <span class="code-label">Start command</span>
+                    <span class="code-label">Start Command</span>
                     <button type="button" class="copy-btn" data-copy>Copy</button>
                 </div>
                 <pre><code>gunicorn config.wsgi:application</code></pre>
             </div>
+            <dl class="field-list">
+                <div class="field">
+                    <dt>Instance Type</dt>
+                    <dd class="field-value"><code>Free</code></dd>
+                    <dd class="field-why">Enough for a class demo. It sleeps after about 15 minutes with no visitors.</dd>
+                </div>
+            </dl>
         </div>
     </li>
 
     <li class="step">
         <div class="step-card">
             <h2>Add environment variables</h2>
-            <p>In the service, open <strong>Environment</strong> and add the same names as your <code>.env</code>:</p>
+            <p>Scroll to <strong>Environment Variables</strong> on the same form. Click <strong>Add from .env</strong> and paste these lines with your own values:</p>
             <div class="code-block">
                 <div class="code-head">
-                    <span class="code-label">Render → Environment</span>
+                    <span class="code-label">Environment Variables</span>
                     <button type="button" class="copy-btn" data-copy>Copy</button>
                 </div>
-                <pre><code>ALLOWED_HOSTS=your-app.onrender.com
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
+                <pre><code>PYTHON_VERSION=3.12.0
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 SUPABASE_DB_NAME=postgres
 SUPABASE_DB_USER=postgres.your_project_ref
-SUPABASE_DB_PASSWORD=
+SUPABASE_DB_PASSWORD=your_password
 SUPABASE_DB_HOST=aws-0-ap-northeast-2.pooler.supabase.com
 SUPABASE_DB_PORT=5432</code></pre>
             </div>
+            <p class="callout callout-tip"><strong>Same as .env:</strong> Render cannot see your laptop's <code>.env</code>, so it needs its own copy. <code>PYTHON_VERSION</code> makes Render use the same Python as your laptop.</p>
+            <p class="callout callout-warn"><strong>Use the Session pooler:</strong> keep the <code>pooler.supabase.com</code> host and the <code>postgres.xxxx</code> user. The direct <code>db.xxxx.supabase.co</code> host will not connect.</p>
         </div>
     </li>
 
     <li class="step">
         <div class="step-card">
-            <h2>Create tables and open the site</h2>
-            <p>In the Render <strong>Shell</strong> tab:</p>
+            <h2>Deploy and watch the logs</h2>
+            <ol>
+                <li>Click <strong>Deploy Web Service</strong> at the bottom</li>
+                <li>Watch the log. The first build takes 2 to 5 minutes</li>
+                <li>Wait for <strong>Your service is live 🎉</strong></li>
+                <li>Click the link at the top of the page</li>
+            </ol>
+            <p class="callout callout-tip"><strong>Good signs in the log:</strong> <code>static files copied</code>, then <code>Applying ... OK</code> or <code>No migrations to apply</code>, then <code>Booting worker</code>.</p>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Create an admin login</h2>
+            <p>The free plan has no Render Shell. You don't need it: your laptop and Render use the same Supabase database, so run this on your laptop:</p>
             <div class="code-block">
                 <div class="code-head">
-                    <span class="code-label">Render Shell</span>
+                    <span class="code-label">Terminal (your laptop)</span>
                     <button type="button" class="copy-btn" data-copy>Copy</button>
                 </div>
-                <pre><code>python manage.py migrate
-python manage.py createsuperuser</code></pre>
+                <pre><code>python manage.py createsuperuser</code></pre>
             </div>
-            <p class="callout callout-tip"><strong>Free plan:</strong> the app sleeps when idle, so the first visit can take about a minute.</p>
+            <p>Then open <code>https://your-app.onrender.com/admin/</code>, log in, and upload a photo. It appears on the home page, from Cloudinary.</p>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>If something goes wrong</h2>
+            <dl class="field-list">
+                <div class="field">
+                    <dt>Build failed</dt>
+                    <dd class="field-why">A package is missing from <code>requirements.txt</code>. Add it, push again, and Render redeploys.</dd>
+                </div>
+                <div class="field">
+                    <dt>Page has no styling</dt>
+                    <dd class="field-why">WhiteNoise is missing from <code>MIDDLEWARE</code>, or <code>collectstatic</code> is missing from the build command.</dd>
+                </div>
+                <div class="field">
+                    <dt>Database connection error</dt>
+                    <dd class="field-why">Check the <code>SUPABASE_DB_*</code> values. Use the Session pooler host and the <code>postgres.xxxx</code> user.</dd>
+                </div>
+                <div class="field">
+                    <dt>Images don't upload</dt>
+                    <dd class="field-why">Check the three <code>CLOUDINARY_*</code> values in Environment.</dd>
+                </div>
+                <div class="field">
+                    <dt>First visit is very slow</dt>
+                    <dd class="field-why">Normal on the free plan. The app was asleep and takes about a minute to wake.</dd>
+                </div>
+            </dl>
         </div>
     </li>
 </ol>

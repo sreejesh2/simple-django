@@ -1,114 +1,92 @@
-# Host this Django project on Render (student guide)
+# Host this Django project on Render (class demo)
 
-This is a simple class demo, not a production setup.
-
-**What each service does**
+This is a simple class demo, not a production setup. The same steps are on the site at `/render/`, with copy buttons.
 
 | Service | Job |
 |---|---|
-| Render | Runs the Django website on the internet |
+| Render | Runs the Django website |
 | Supabase | Stores data (Postgres) |
 | Cloudinary | Stores uploaded images |
 
-Your laptop uses `python manage.py runserver`. Render cannot use that. It uses a small server called **Gunicorn** instead.
+## 1. Project setup (already done in this repo)
 
-## 1. Add two packages
+`requirements.txt` includes `gunicorn` (runs Django on the server) and `whitenoise` (serves CSS and JS).
 
-Students already have Django, Cloudinary, and Supabase. For Render, also add:
-
-```text
-gunicorn
-psycopg[binary]
-```
-
-`gunicorn` starts the site on Render.  
-`psycopg` lets Django talk to Supabase Postgres.
-
-Put them in `requirements.txt` so Render can install them.
-
-## 2. One setting students must change
-
-On your laptop, `ALLOWED_HOSTS = []` is fine.  
-On Render, Django needs the website name, or it will block the page.
-
-In `config/settings.py`:
+`config/settings.py` has WhiteNoise right after `SecurityMiddleware`, and:
 
 ```python
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+ALLOWED_HOSTS = ['*']
 ```
 
-That reads the host from an environment variable, same idea as Cloudinary and Supabase.
+## 2. Push to GitHub
 
-## 3. Put the code on GitHub
+```bash
+git add .
+git commit -m "ready for render"
+git push origin main
+```
 
-1. Create a GitHub repository.
-2. Do **not** upload `.env` (it is already in `.gitignore`).
-3. Push the project.
+`.env` is in `.gitignore`. The keys go into Render, not GitHub.
 
-Render reads the code from GitHub.
+## 3. Create the Web Service
 
-## 4. Create a Web Service
-
-1. Go to [https://render.com](https://render.com) and sign in (GitHub login is easiest).
-2. Click **New** → **Web Service**.
-3. Pick this repo.
-
-Use these commands:
+Render → **+ New** → **Web Service** → pick the GitHub repo. Then fill in the form:
 
 | Field | Value | Why |
 |---|---|---|
-| Build command | `pip install -r requirements.txt` | Installs Django and the other packages |
-| Start command | `gunicorn config.wsgi:application` | Starts the site (`config` is this project folder) |
+| Name | `mams-django-workshop` | Becomes `mams-django-workshop.onrender.com` |
+| Project | leave as is | Optional grouping only |
+| Language | `Python 3` | Django is Python |
+| Branch | `main` | Deploys on every push to `main` |
+| Region | `Singapore (Southeast Asia)` | Closest to India and to Supabase |
+| Root Directory | leave empty | `manage.py` is at the repo root |
+| Build Command | see below | Install, collect CSS, create tables |
+| Start Command | `gunicorn config.wsgi:application` | `config` holds `wsgi.py` |
+| Instance Type | `Free` | Enough for a demo; sleeps when idle |
 
-## 5. Copy env vars into Render
-
-Locally those values live in `.env`.  
-On Render: open the service → **Environment** → add the same names.
+Build Command:
 
 ```bash
-ALLOWED_HOSTS=your-service.onrender.com
+pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+```
 
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
+## 4. Environment variables
 
+On the same form → **Environment Variables** → **Add from .env**, then paste:
+
+```bash
+PYTHON_VERSION=3.12.0
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 SUPABASE_DB_NAME=postgres
 SUPABASE_DB_USER=postgres.your_project_ref
-SUPABASE_DB_PASSWORD=
+SUPABASE_DB_PASSWORD=your_password
 SUPABASE_DB_HOST=aws-0-ap-northeast-2.pooler.supabase.com
 SUPABASE_DB_PORT=5432
 ```
 
-Use the **Session pooler** host and user `postgres.xxxx`.  
-Do not use `db.xxxx.supabase.co` (that one is IPv6 and Render cannot reach it).
+Use the Session pooler host and `postgres.xxxx` user. The direct `db.xxxx.supabase.co` host will not connect.
 
-After the first deploy, Render gives you a URL like `https://something.onrender.com`. Put that host in `ALLOWED_HOSTS`.
+## 5. Deploy
 
-## 6. Create the tables
+Click **Deploy Web Service**. Wait for **Your service is live**, then open the link.
 
-In the Render **Shell**:
+## 6. Admin login
+
+The free plan has no Render Shell. Laptop and Render share the same Supabase database, so run this on the laptop:
 
 ```bash
-python manage.py migrate
 python manage.py createsuperuser
 ```
 
-`migrate` creates the Django tables in Supabase.  
-`createsuperuser` makes an admin login.
-
-## 7. Open the site
-
-Visit `https://your-service.onrender.com/`.
-
-- Home page = Django templates on Render
-- Photo rows = Supabase
-- Photo files = Cloudinary
-- Admin = `/admin/`
+Then log in at `https://your-app.onrender.com/admin/`.
 
 ## If something fails
 
-- **DisallowedHost** — `ALLOWED_HOSTS` does not match the Render URL.
-- **Database error** — wrong host. Use Session pooler, not the direct `db.` host.
-- **Site is slow the first time** — free Render apps sleep. The first click wakes them up.
-
-See `SUPABASE.md` and `CLOUDINARY.md` for those parts.
+- **Build failed** — a package is missing from `requirements.txt`.
+- **No styling** — WhiteNoise missing from `MIDDLEWARE`, or `collectstatic` missing from the build command.
+- **Database error** — wrong `SUPABASE_DB_*` values; use the Session pooler.
+- **Images don't upload** — check the `CLOUDINARY_*` values.
+- **Slow first visit** — the free app was asleep.

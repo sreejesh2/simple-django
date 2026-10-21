@@ -3,3 +3,6 @@ cloudinary
 django-cloudinary-storage
 Pillow
 python-dotenv
+psycopg[binary]
+gunicorn
+whitenoise

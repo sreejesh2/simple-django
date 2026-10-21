@@ -590,8 +590,6 @@ nav a.active {
 /* Callouts */
 
 .callout {
-    display: flex;
-    gap: 0.6rem;
     margin: 0.9rem 0 0;
     padding: 0.8rem 1rem;
     border-radius: 12px;
@@ -599,7 +597,7 @@ nav a.active {
 }
 
 .callout strong {
-    flex-shrink: 0;
+    margin-right: 0.35rem;
 }
 
 .callout-tip {
@@ -610,6 +608,52 @@ nav a.active {
 .callout-warn {
     background: #fff4e5;
     color: #8a4b00;
+}
+
+/* Form field walkthrough */
+
+.field-list {
+    margin: 0.9rem 0 0;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.field {
+    display: grid;
+    grid-template-columns: 9.5rem 1fr;
+    gap: 0.15rem 1rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.field:last-child {
+    border-bottom: 0;
+}
+
+.field dt {
+    grid-row: span 2;
+    font-weight: 700;
+}
+
+.field dd {
+    margin: 0;
+}
+
+.field-value {
+    font-weight: 600;
+}
+
+.field-why {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.optional {
+    display: block;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 500;
 }
 
 /* Compare table */
@@ -988,6 +1032,14 @@ nav a.active {
 
     .compare {
         font-size: 0.82rem;
+    }
+
+    .field {
+        grid-template-columns: 1fr;
+    }
+
+    .field dt {
+        grid-row: auto;
     }
 
     .compare th,
