@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <p class="eyebrow">About</p>
+    <h1>{{ heading }}</h1>
+    <p class="lede">
+        A small sample project that shows how Django maps URLs to views
+        and views to templates.
+    </p>
+</section>
+
+<section class="stack">
+    <article class="card">
+        <h2>How a page is built</h2>
+        <ol>
+            <li>A URL in <code>pages/urls.py</code> points to a view.</li>
+            <li>The view calls <code>render()</code> with a template name and context.</li>
+            <li>The template extends <code>base.html</code> and fills the content block.</li>
+        </ol>
+    </article>
+</section>
+{% endblock %}

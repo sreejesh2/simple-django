@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block theme %}theme-supabase{% endblock %}
+
+{% block content %}
+<section class="lesson-hero">
+    <div class="lesson-hero-top">
+        <span class="lesson-mark">S</span>
+        <span class="badge">Lesson 2 of 3</span>
+    </div>
+    <h1>{{ heading }}</h1>
+    <p class="lede">
+        Supabase gives you a Postgres database in the cloud. Django talks to it
+        like any other Postgres database, so you don't need the Supabase JavaScript client.
+    </p>
+    <ul class="key-points">
+        <li><strong>You need:</strong> a free Supabase project</li>
+        <li><strong>Time:</strong> about 10 minutes</li>
+        <li><strong>Result:</strong> Django tables live in Supabase</li>
+    </ul>
+</section>
+
+<ol class="steps">
+    <li class="step">
+        <div class="step-card">
+            <h2>Create a project and open Connect</h2>
+            <ol>
+                <li>Open <a href="https://supabase.com" target="_blank" rel="noreferrer">supabase.com</a> and create a project</li>
+                <li>Save the database password you choose</li>
+                <li>Click <strong>Connect</strong> at the top of the dashboard</li>
+                <li>Pick <strong>Session pooler</strong></li>
+            </ol>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Why the user and host look different</h2>
+            <p>Supabase shows two kinds of connection. Use the Session pooler.</p>
+            <table class="compare">
+                <tr>
+                    <th></th>
+                    <th>Direct</th>
+                    <th>Session pooler</th>
+                </tr>
+                <tr>
+                    <th>Host</th>
+                    <td><code>db.xxxx.supabase.co</code></td>
+                    <td class="use"><code>aws-0-region.pooler.supabase.com</code></td>
+                </tr>
+                <tr>
+                    <th>User</th>
+                    <td><code>postgres</code></td>
+                    <td class="use"><code>postgres.xxxx</code></td>
+                </tr>
+                <tr>
+                    <th>Works on Wi-Fi?</th>
+                    <td>Often no (IPv6 only)</td>
+                    <td class="use">Yes (IPv4)</td>
+                </tr>
+            </table>
+            <p class="callout callout-tip"><strong>Why .xxxx?</strong> Many projects share the pooler, so the user name carries your project id.</p>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Install the Postgres driver</h2>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">Terminal</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>pip install "psycopg[binary]"</code></pre>
+            </div>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Put the values in <code>.env</code></h2>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">.env</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>SUPABASE_DB_NAME=postgres
+SUPABASE_DB_USER=postgres.your_project_ref
+SUPABASE_DB_PASSWORD=your_password
+SUPABASE_DB_HOST=aws-0-ap-northeast-2.pooler.supabase.com
+SUPABASE_DB_PORT=5432</code></pre>
+            </div>
+            <p class="callout callout-warn"><strong>Use your own host:</strong> copy it from the Connect screen. The region part differs per project.</p>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Point Django at Supabase</h2>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">config/settings.py</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('SUPABASE_DB_NAME', 'postgres'),
+        'USER': os.environ.get('SUPABASE_DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('SUPABASE_DB_PASSWORD', ''),
+        'HOST': os.environ.get('SUPABASE_DB_HOST', ''),
+        'PORT': os.environ.get('SUPABASE_DB_PORT', '5432'),
+        'OPTIONS': {'sslmode': 'require'},
+    }
+}</code></pre>
+            </div>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Create the tables</h2>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">Terminal</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>python manage.py migrate
+python manage.py createsuperuser</code></pre>
+            </div>
+            <p class="callout callout-tip"><strong>Check it:</strong> in Supabase, open <strong>Table Editor</strong>. You will see <code>auth_user</code> and <code>pages_photo</code>.</p>
+        </div>
+    </li>
+</ol>
+
+<nav class="pager">
+    <a class="pager-link" href="{% url 'cloudinary' %}">
+        <small>← Previous</small>
+        <span>Lesson 1 · Cloudinary</span>
+    </a>
+    <a class="pager-link pager-next" href="{% url 'render' %}">
+        <small>Next →</small>
+        <span>Lesson 3 · Render</span>
+    </a>
+</nav>
+{% endblock %}

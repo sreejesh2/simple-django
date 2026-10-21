@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ page_title }}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="{% block theme %}theme-home{% endblock %}">
+    <header class="site-header">
+        <div class="wrap header-inner">
+            <a class="logo" href="{% url 'home' %}">
+                <span class="logo-mark">M</span>
+                <span class="logo-text">
+                    {{ college.short_name }} · Django Workshop
+                    <small>{{ workshop.department }}</small>
+                </span>
+            </a>
+            <nav>
+                <a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>Home</a>
+                <a href="{% url 'cloudinary' %}" {% if request.resolver_match.url_name == 'cloudinary' %}class="active"{% endif %}>1 · Cloudinary</a>
+                <a href="{% url 'supabase' %}" {% if request.resolver_match.url_name == 'supabase' %}class="active"{% endif %}>2 · Supabase</a>
+                <a href="{% url 'render' %}" {% if request.resolver_match.url_name == 'render' %}class="active"{% endif %}>3 · Render</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="content">
+        <div class="wrap">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap footer-college">
+            <div>
+                <strong>{{ college.name }}</strong>
+                <p>{{ college.affiliation }} · {{ college.phone }}</p>
+                <p>{{ college.address }}</p>
+                <p>In association with {{ college.partner }}</p>
+            </div>
+            <div class="footer-links">
+                <a href="{{ college.website }}" target="_blank" rel="noreferrer">{{ college.website_label }}</a>
+                <a href="{{ college.instagram }}" target="_blank" rel="noreferrer">{{ college.instagram_label }}</a>
+            </div>
+        </div>
+        <div class="wrap footer-inner">
+            <span>Same Wi-Fi? Open this on your phone:</span>
+            <a class="footer-class-url" href="{{ class_url }}">{{ class_url }}</a>
+        </div>
+    </footer>
+    <script src="{% static 'js/copy.js' %}"></script>
+</body>
+</html>

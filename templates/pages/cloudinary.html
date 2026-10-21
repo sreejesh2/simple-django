@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block theme %}theme-cloudinary{% endblock %}
+
+{% block content %}
+<section class="lesson-hero">
+    <div class="lesson-hero-top">
+        <span class="lesson-mark">C</span>
+        <span class="badge">Lesson 1 of 3</span>
+    </div>
+    <h1>{{ heading }}</h1>
+    <p class="lede">
+        Cloudinary keeps the image file. Django only stores the Cloudinary link.
+        Your CSS and templates stay in this project.
+    </p>
+    <ul class="key-points">
+        <li><strong>You need:</strong> a free Cloudinary account</li>
+        <li><strong>Time:</strong> about 10 minutes</li>
+        <li><strong>Result:</strong> uploads appear on the home page</li>
+    </ul>
+</section>
+
+<ol class="steps">
+    <li class="step">
+        <div class="step-card">
+            <h2>Create a free account</h2>
+            <ol>
+                <li>Open <a href="https://cloudinary.com" target="_blank" rel="noreferrer">cloudinary.com</a> and sign up</li>
+                <li>On the dashboard, find <strong>Cloud name</strong>, <strong>API key</strong>, and <strong>API secret</strong></li>
+            </ol>
+            <p class="callout callout-warn"><strong>Keep it secret:</strong> the API secret is like a password. Never push it to GitHub.</p>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Install the packages</h2>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">Terminal</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>pip install cloudinary django-cloudinary-storage Pillow python-dotenv</code></pre>
+            </div>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Put your keys in <code>.env</code></h2>
+            <p>Create a file called <code>.env</code> next to <code>manage.py</code>:</p>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">.env</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret</code></pre>
+            </div>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Add the apps in settings</h2>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">config/settings.py</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>INSTALLED_APPS = [
+    # ... Django apps ...
+    'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
+    'pages',
+]</code></pre>
+            </div>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Read the keys and send uploads to Cloudinary</h2>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">config/settings.py</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>import os
+from dotenv import load_dotenv
+
+load_dotenv(BASE_DIR / '.env')
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
+}
+
+MEDIA_URL = '/media/'
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}</code></pre>
+            </div>
+            <p class="callout callout-tip"><strong>What this does:</strong> uploaded files go to Cloudinary, while CSS stays local.</p>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Create a Photo model</h2>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">pages/models.py</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>from django.db import models
+
+
+class Photo(models.Model):
+    title = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='photos/')
+
+    def __str__(self):
+        return self.title</code></pre>
+            </div>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">pages/admin.py</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>from django.contrib import admin
+
+from .models import Photo
+
+admin.site.register(Photo)</code></pre>
+            </div>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">Terminal</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>python manage.py makemigrations
+python manage.py migrate
+python manage.py createsuperuser</code></pre>
+            </div>
+        </div>
+    </li>
+
+    <li class="step">
+        <div class="step-card">
+            <h2>Show the image on a page</h2>
+            <p>Upload a photo from <code>/admin/</code>, then use this in a template:</p>
+            <div class="code-block">
+                <div class="code-head">
+                    <span class="code-label">templates/pages/home.html</span>
+                    <button type="button" class="copy-btn" data-copy>Copy</button>
+                </div>
+                <pre><code>{% verbatim %}{% for photo in photos %}
+    &lt;img src="{{ photo.image.url }}" alt="{{ photo.title }}"&gt;
+{% endfor %}{% endverbatim %}</code></pre>
+            </div>
+            <p class="callout callout-tip"><strong>Check it:</strong> right-click the image and open it. The address starts with <code>res.cloudinary.com</code>.</p>
+        </div>
+    </li>
+</ol>
+
+<nav class="pager">
+    <a class="pager-link" href="{% url 'home' %}">
+        <small>← Back</small>
+        <span>Home</span>
+    </a>
+    <a class="pager-link pager-next" href="{% url 'supabase' %}">
+        <small>Next →</small>
+        <span>Lesson 2 · Supabase</span>
+    </a>
+</nav>
+{% endblock %}

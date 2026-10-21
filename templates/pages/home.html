@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-home">
+    <p class="hero-college">{{ college.name }} · {{ workshop.department }}</p>
+    <p class="badge">{{ workshop.type }}</p>
+    <h1>{{ workshop.title }}</h1>
+    <p class="lede">
+        Build one Django site with three cloud services: images on Cloudinary,
+        data in Supabase, and the website on Render. Follow the lessons in order
+        and copy each command as you go.
+    </p>
+    <ul class="event-facts">
+        <li><small>Date</small>{{ workshop.date }}</li>
+        <li><small>Time</small>{{ workshop.time }}</li>
+        <li><small>Venue</small>{{ workshop.venue }}</li>
+    </ul>
+    <div class="hero-actions">
+        <a class="btn btn-primary" href="{% url 'cloudinary' %}">Start lesson 1 →</a>
+        <a class="btn btn-ghost" href="/admin/">Open admin</a>
+    </div>
+</section>
+
+<section class="join">
+    <div>
+        <h2>Join from your phone or laptop</h2>
+        <p>Connect to the same Wi-Fi as the teacher, then open:</p>
+        <a class="join-url" href="{{ class_url }}">{{ class_url }}</a>
+    </div>
+    <div>
+        <p class="mini-label">Teacher runs</p>
+        <div class="code-block">
+            <div class="code-head">
+                <span class="code-label">Terminal</span>
+                <button type="button" class="copy-btn" data-copy>Copy</button>
+            </div>
+            <pre><code>python manage.py runserver 0.0.0.0:8000</code></pre>
+        </div>
+        <p class="callout callout-tip"><strong>Why 0.0.0.0?</strong> It lets other devices on the Wi-Fi reach this laptop.</p>
+    </div>
+</section>
+
+<section class="section">
+    <h2 class="section-title">Resource persons</h2>
+    <div class="people-grid">
+        {% for speaker in workshop.speakers %}
+        <article class="person-card">
+            <span class="person-initial">{{ speaker.name|slice:":1" }}</span>
+            <div>
+                <h3>{{ speaker.name }}</h3>
+                <p>{{ speaker.role }}</p>
+                <p class="person-org">{{ speaker.org }}</p>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section">
+    <h2 class="section-title">How the pieces fit</h2>
+    <div class="flow">
+        <div class="flow-node">
+            <span>Browser</span>
+            <small>A student opens the page</small>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node theme-render">
+            <span>Django</span>
+            <small>Runs on this laptop today, on Render later</small>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-split">
+            <div class="flow-node theme-supabase">
+                <span>Supabase</span>
+                <small>Stores rows: title and image path</small>
+            </div>
+            <div class="flow-node theme-cloudinary">
+                <span>Cloudinary</span>
+                <small>Stores the image file itself</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <h2 class="section-title">Lessons</h2>
+    <div class="lesson-grid">
+        <a class="lesson-card theme-cloudinary" href="{% url 'cloudinary' %}">
+            <span class="lesson-mark">C</span>
+            <span class="lesson-num">Lesson 1</span>
+            <h3>Cloudinary</h3>
+            <p>Upload images. Django saves the file in the cloud, not on this laptop.</p>
+            <span class="lesson-go">Open lesson →</span>
+        </a>
+        <a class="lesson-card theme-supabase" href="{% url 'supabase' %}">
+            <span class="lesson-mark">S</span>
+            <span class="lesson-num">Lesson 2</span>
+            <h3>Supabase</h3>
+            <p>A hosted Postgres database. Your tables and rows live here.</p>
+            <span class="lesson-go">Open lesson →</span>
+        </a>
+        <a class="lesson-card theme-render" href="{% url 'render' %}">
+            <span class="lesson-mark">R</span>
+            <span class="lesson-num">Lesson 3</span>
+            <h3>Render</h3>
+            <p>Put the Django site on the internet with a public URL.</p>
+            <span class="lesson-go">Open lesson →</span>
+        </a>
+    </div>
+</section>
+
+<section class="section">
+    <h2 class="section-title">Live demo: uploaded photos</h2>
+    {% if photos %}
+    <div class="photo-grid">
+        {% for photo in photos %}
+        <figure class="photo-card">
+            <img src="{{ photo.image.url }}" alt="{{ photo.title }}">
+            <figcaption>{{ photo.title }}</figcaption>
+        </figure>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">
+        No photos yet. Upload one in <a href="/admin/pages/photo/add/">admin</a> and refresh this page.
+    </div>
+    {% endif %}
+</section>
+
+<section class="section">
+    <h2 class="section-title">Organised by</h2>
+    <div class="organiser-grid">
+        {% for person in workshop.organisers %}
+        <div class="organiser">
+            <strong>{{ person.name }}</strong>
+            <span>{{ person.role }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    <p class="contact-line">
+        For more info:
+        {% for phone in workshop.contacts %}<a href="tel:{{ phone }}">{{ phone }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+    </p>
+</section>
+{% endblock %}
