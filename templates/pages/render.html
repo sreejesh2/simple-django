@@ -233,6 +233,10 @@ SUPABASE_DB_PORT=5432</code></pre>
                     <dd class="field-why">A package is missing from <code>requirements.txt</code>. Add it, push again, and Render redeploys.</dd>
                 </div>
                 <div class="field">
+                    <dt><code>'super' object has no attribute 'dicts'</code></dt>
+                    <dd class="field-why">Render used a newer Python than Django 5.1 supports. Add a <code>.python-version</code> file containing <code>3.12.0</code>, or set <code>PYTHON_VERSION=3.12.0</code> in Environment.</dd>
+                </div>
+                <div class="field">
                     <dt>Page has no styling</dt>
                     <dd class="field-why">WhiteNoise is missing from <code>MIDDLEWARE</code>, or <code>collectstatic</code> is missing from the build command.</dd>
                 </div>

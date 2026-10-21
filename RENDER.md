@@ -86,6 +86,7 @@ Then log in at `https://your-app.onrender.com/admin/`.
 ## If something fails
 
 - **Build failed** — a package is missing from `requirements.txt`.
+- **`'super' object has no attribute 'dicts'`** — Render picked Python 3.14, which Django 5.1 does not support. The repo's `.python-version` file pins `3.12.0`.
 - **No styling** — WhiteNoise missing from `MIDDLEWARE`, or `collectstatic` missing from the build command.
 - **Database error** — wrong `SUPABASE_DB_*` values; use the Session pooler.
 - **Images don't upload** — check the `CLOUDINARY_*` values.
